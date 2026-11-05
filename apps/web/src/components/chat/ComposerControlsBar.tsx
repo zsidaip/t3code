@@ -220,7 +220,8 @@ export function ComposerControlsBar(props: {
       triggerClassName={cn(
         "group/model-trigger",
         MODEL_TRIGGER_STATES,
-        composerControlsCollapsed ? "min-w-13 shrink text-xs!" : "min-w-13",
+        "min-w-13 text-xs!",
+        composerControlsCollapsed && "shrink",
       )}
       triggerSuffix={effort.suffix}
       triggerDetail={effort.detail}
