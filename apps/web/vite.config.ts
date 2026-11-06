@@ -1,5 +1,6 @@
 // @effect-diagnostics-next-line nodeBuiltinImport:off -- Vite config runs before any Effect runtime.
 import * as NodeFSP from "node:fs/promises";
+import * as NodeNet from "node:net";
 import * as NodeZlib from "node:zlib";
 
 import react from "@vitejs/plugin-react";
@@ -95,7 +96,23 @@ const unitTestProject = {
 } satisfies TestProjectInlineConfiguration;
 
 // Hash checkout paths to ports 61000-64999; Vitest's fixed port collides under inherited strictPort.
-const browserTestApiPort = 61_000 + ((Hash.string(import.meta.dirname) >>> 0) % 4_000);
+const browserTestApiPortStart = (Hash.string(import.meta.dirname) >>> 0) % 4_000;
+
+// Windows reserves port ranges (WinNAT); binding one is EACCES, which Vite's strictPort fallback ignores.
+const canBind = (port: number) =>
+  new Promise<boolean>((resolve) => {
+    const server = NodeNet.createServer();
+    server.once("error", () => resolve(false));
+    server.listen(port, () => server.close(() => resolve(true)));
+  });
+
+const browserTestApiPort = await (async () => {
+  for (let offset = 0; offset < 4_000; offset++) {
+    const port = 61_000 + ((browserTestApiPortStart + offset) % 4_000);
+    if (await canBind(port)) return port;
+  }
+  return 61_000 + browserTestApiPortStart;
+})();
 
 const browserTestProject = {
   extends: true,
