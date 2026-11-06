@@ -1132,8 +1132,8 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
   --secondary: var(--color-zinc-50);
   --secondary-foreground: var(--color-zinc-800);
   --muted: var(--color-zinc-50);
-  --muted-foreground: var(--color-zinc-500);
-  --placeholder: var(--muted-foreground);
+  --muted-foreground: var(--color-zinc-600);
+  --placeholder: var(--color-zinc-500);
   --secondary-label: var(--muted-foreground);
   --icon-muted: var(--muted-foreground);
   /* One step past the accent, so a user turn stands off the near-white canvas. */
@@ -1200,7 +1200,8 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
     --secondary: --alpha(var(--color-white) / 3%);
     --secondary-foreground: var(--color-neutral-100);
     --muted: --alpha(var(--color-white) / 3%);
-    --muted-foreground: var(--color-neutral-400);
+    --muted-foreground: #c4c4c4;
+    --placeholder: var(--color-neutral-400);
     --accent: --alpha(var(--color-white) / 4%);
     --accent-foreground: var(--color-neutral-100);
     /* A user turn sits above the composer tone, level with the selected sidebar row. */
@@ -1239,12 +1240,12 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
   --accent: var(--color-zinc-100);
   --accent-foreground: var(--color-zinc-900);
   --muted: var(--color-zinc-50);
-  --muted-foreground: var(--color-zinc-500);
+  --muted-foreground: var(--color-zinc-600);
   --border: var(--color-zinc-200);
   --input: var(--color-zinc-300);
   --sidebar: var(--color-zinc-50);
   --sidebar-foreground: var(--color-zinc-900);
-  --sidebar-muted-foreground: var(--color-zinc-500);
+  --sidebar-muted-foreground: var(--color-zinc-600);
   --sidebar-control-surface: var(--color-zinc-100);
   --sidebar-row-hover: var(--color-zinc-25);
   --sidebar-row-active: var(--color-white);
@@ -1260,7 +1261,7 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
     --accent: #191a1d;
     --accent-foreground: #f7f9ff;
     --muted: #0a0a0a;
-    --muted-foreground: #a3a3a3;
+    --muted-foreground: #c4c4c4;
     --border: rgb(255 255 255 / 8%);
     --input: rgb(255 255 255 / 18%);
     --sidebar: var(--card);
@@ -1346,10 +1347,18 @@ html[data-theme-id]:not([data-theme-id=""]) {
   --secondary: var(--app-theme-secondary);
   --secondary-foreground: var(--app-theme-secondary-foreground);
   --muted: var(--app-theme-muted);
-  --muted-foreground: var(--app-theme-muted-foreground);
+  --muted-foreground: color-mix(
+    in oklab,
+    var(--app-theme-muted-foreground) 60%,
+    var(--app-theme-text)
+  );
   --placeholder: var(--app-theme-placeholder);
-  --secondary-label: var(--app-theme-secondary-label);
-  --icon-muted: var(--app-theme-icon-muted);
+  --secondary-label: color-mix(
+    in oklab,
+    var(--app-theme-secondary-label) 60%,
+    var(--app-theme-text)
+  );
+  --icon-muted: color-mix(in oklab, var(--app-theme-icon-muted) 60%, var(--app-theme-text));
   --accent: var(--app-theme-accent-surface);
   --accent-foreground: var(--app-theme-accent-surface-foreground);
   --message-surface: var(--app-theme-message-surface);
@@ -1373,7 +1382,11 @@ html[data-theme-id]:not([data-theme-id=""]) {
   --ring: var(--app-theme-focus);
   --sidebar: var(--app-theme-sidebar);
   --sidebar-foreground: var(--app-theme-sidebar-foreground);
-  --sidebar-muted-foreground: var(--app-theme-sidebar-muted-foreground);
+  --sidebar-muted-foreground: color-mix(
+    in oklab,
+    var(--app-theme-sidebar-muted-foreground) 60%,
+    var(--app-theme-sidebar-foreground)
+  );
   --sidebar-control-surface: var(--app-theme-sidebar-control-surface);
   --sidebar-row-hover: var(--app-theme-sidebar-row-hover);
   --sidebar-row-active: var(--app-theme-sidebar-row-active);
@@ -1568,13 +1581,25 @@ html[data-theme-id] [data-app-sidebar] {
   --accent: var(--app-theme-accent-surface);
   --accent-foreground: var(--app-theme-accent-surface-foreground);
   --muted: var(--app-theme-muted);
-  --muted-foreground: var(--app-theme-muted-foreground);
-  --secondary-label: var(--app-theme-secondary-label);
+  --muted-foreground: color-mix(
+    in oklab,
+    var(--app-theme-muted-foreground) 60%,
+    var(--app-theme-text)
+  );
+  --secondary-label: color-mix(
+    in oklab,
+    var(--app-theme-secondary-label) 60%,
+    var(--app-theme-text)
+  );
   --border: var(--app-theme-border);
   --input: var(--app-theme-input);
   --sidebar: var(--app-theme-sidebar);
   --sidebar-foreground: var(--app-theme-sidebar-foreground);
-  --sidebar-muted-foreground: var(--app-theme-sidebar-muted-foreground);
+  --sidebar-muted-foreground: color-mix(
+    in oklab,
+    var(--app-theme-sidebar-muted-foreground) 60%,
+    var(--app-theme-sidebar-foreground)
+  );
   --sidebar-control-surface: var(--app-theme-sidebar-control-surface);
   --sidebar-row-hover: var(--app-theme-sidebar-row-hover);
   --sidebar-row-active: var(--app-theme-sidebar-row-active);

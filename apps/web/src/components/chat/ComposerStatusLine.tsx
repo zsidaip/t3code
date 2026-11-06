@@ -40,23 +40,32 @@ export function ComposerStatusLine({
   const cacheExpired = line.cache !== null && line.cache.remaining === null;
   return (
     <div
-      className="flex h-8 min-w-0 shrink items-center gap-1.5 text-xs font-medium text-foreground/80 tabular-nums"
+      className="flex h-8 min-w-0 shrink items-center gap-1.5 text-xs text-muted-foreground tabular-nums"
       data-chat-composer-status-line="true"
     >
-      <GaugeIcon className="size-3.5 shrink-0 text-muted-foreground" />
+      <GaugeIcon className="size-3.5 shrink-0" />
       {line.windows.map((window, index) => (
         <span key={window.label} className="flex min-w-0 items-center gap-1.5">
           {index > 0 ? <Separator /> : null}
           <span className="truncate">
-            {window.label} {window.remainingPercent}%
-            {window.resetsIn ? ` · ${window.resetsIn}` : ""}
+            <span>{window.label} </span>
+            <span className="font-medium text-foreground">{window.remainingPercent}%</span>
+            {window.resetsIn ? (
+              <>
+                <span> · </span>
+                <span className="font-medium text-foreground">{window.resetsIn}</span>
+              </>
+            ) : null}
           </span>
         </span>
       ))}
       {line.windows.length > 0 && line.cache ? <Separator /> : null}
       {line.cache ? (
         <span className={cn("shrink-0", cacheExpired && "text-destructive")}>
-          Cache {line.cache.remaining ?? "–"}
+          <span>Cache </span>
+          <span className={cn(!cacheExpired && "font-medium text-foreground")}>
+            {line.cache.remaining ?? "–"}
+          </span>
         </span>
       ) : null}
     </div>
