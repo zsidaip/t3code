@@ -7,6 +7,8 @@ export const TYPE_TO_FOCUS_EDITABLE_SELECTOR = [
   '[contenteditable="true"]',
   '[contenteditable="plaintext-only"]',
   '[role="textbox"]',
+  // Preview annotation overlay: closed shadow root, events only expose the host.
+  "[data-t3code-annotation-ui]",
 ].join(",");
 const TYPE_TO_FOCUS_INTERACTIVE_SELECTOR = [
   "button",

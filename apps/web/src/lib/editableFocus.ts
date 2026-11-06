@@ -6,6 +6,7 @@ const EDITABLE_SELECTOR = [
   '[contenteditable="true"]',
   '[contenteditable="plaintext-only"]',
   '[role="textbox"]',
+  "[data-t3code-annotation-ui]",
 ].join(",");
 
 /** Includes focused descendants of open shadow roots, whose key events target the host. */
