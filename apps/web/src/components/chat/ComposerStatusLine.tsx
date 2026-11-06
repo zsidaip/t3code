@@ -5,10 +5,11 @@ import type {
   UsageLimitSourceSnapshots,
 } from "@t3tools/contracts";
 import { collectProviderUsageLimits } from "@t3tools/shared/usageLimits";
-import { GaugeIcon } from "lucide-react";
+import { GaugeIcon, TimerIcon } from "lucide-react";
 
 import { useNowMinute } from "../../hooks/useNowMinute";
 import { cn } from "../../lib/utils";
+import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import { deriveComposerStatusLine } from "./ComposerStatusLine.logic";
 
 export function ComposerStatusLine({
@@ -39,43 +40,55 @@ export function ComposerStatusLine({
   if (line === null) return null;
   const cacheExpired = line.cache !== null && line.cache.remaining === null;
   return (
-    <div
-      className="flex h-8 min-w-0 shrink items-center gap-1.5 text-xs text-muted-foreground tabular-nums"
-      data-chat-composer-status-line="true"
-    >
-      <GaugeIcon className="size-3.5 shrink-0" />
-      {line.windows.map((window, index) => (
-        <span key={window.label} className="flex min-w-0 items-center gap-1.5">
-          {index > 0 ? <Separator /> : null}
-          <span className="truncate">
-            <span>{window.label} </span>
-            <span className="font-medium text-foreground">{window.remainingPercent}%</span>
-            {window.resetsIn ? (
-              <>
-                <span> · </span>
-                <span className="font-medium text-foreground">{window.resetsIn}</span>
-              </>
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <div
+            className="flex h-8 min-w-0 shrink items-center gap-2 text-xs text-muted-foreground tabular-nums"
+            data-chat-composer-status-line="true"
+          />
+        }
+      >
+        <GaugeIcon className="size-3.5 shrink-0" />
+        {line.windows.map((window, index) => (
+          <span key={window.label} className="flex min-w-0 items-center gap-1">
+            {index > 0 ? (
+              <span aria-hidden="true" className="text-muted-foreground">
+                ·
+              </span>
             ) : null}
+            <span className="truncate">
+              <span className="font-medium text-foreground">{window.remainingPercent}%</span>
+              {window.resetsIn ? <span> {window.resetsIn.short}</span> : null}
+            </span>
           </span>
-        </span>
-      ))}
-      {line.windows.length > 0 && line.cache ? <Separator /> : null}
-      {line.cache ? (
-        <span className={cn("shrink-0", cacheExpired && "text-destructive")}>
-          <span>Cache </span>
-          <span className={cn(!cacheExpired && "font-medium text-foreground")}>
-            {line.cache.remaining ?? "–"}
+        ))}
+        {line.cache ? (
+          <span
+            className={cn("flex shrink-0 items-center gap-1", cacheExpired && "text-destructive")}
+          >
+            <TimerIcon aria-hidden="true" className="size-3.5" />
+            <span className={cn(!cacheExpired && "font-medium text-foreground")}>
+              {line.cache.remaining?.short ?? "–"}
+            </span>
           </span>
-        </span>
-      ) : null}
-    </div>
-  );
-}
-
-function Separator() {
-  return (
-    <span aria-hidden="true" className="text-muted-foreground">
-      |
-    </span>
+        ) : null}
+      </TooltipTrigger>
+      <TooltipPopup side="top">
+        {line.windows.map((window) => (
+          <span key={window.label} className="block">
+            {`${window.label}: ${window.remainingPercent}% left`}
+            {window.resetsIn ? ` · resets in ${window.resetsIn.long}` : null}
+          </span>
+        ))}
+        {line.cache ? (
+          <span className="block">
+            {line.cache.remaining
+              ? `Prompt cache: ${line.cache.remaining.long} left`
+              : "Prompt cache expired"}
+          </span>
+        ) : null}
+      </TooltipPopup>
+    </Tooltip>
   );
 }

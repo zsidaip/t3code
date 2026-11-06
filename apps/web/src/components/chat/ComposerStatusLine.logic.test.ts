@@ -1,7 +1,7 @@
 import type { UsageLimitsReport } from "@t3tools/contracts";
 import { describe, expect, it } from "vite-plus/test";
 
-import { deriveComposerStatusLine } from "./ComposerStatusLine.logic";
+import { compactDuration, deriveComposerStatusLine } from "./ComposerStatusLine.logic";
 
 const NOW = Date.parse("2026-11-05T10:00:00.000Z");
 
@@ -19,6 +19,22 @@ const report = (windows: unknown[], unavailable?: unknown): UsageLimitsReport =>
     ],
   }) as unknown as UsageLimitsReport;
 
+describe("compactDuration", () => {
+  it.each([
+    [0, "0m"],
+    [59_999, "0m"],
+    [52 * 60_000, "52m"],
+    [60 * 60_000, "1h"],
+    [(3 * 60 + 56) * 60_000, "3h56m"],
+    [(23 * 60 + 59) * 60_000, "23h59m"],
+    [24 * 60 * 60_000, "1d"],
+    [(5 * 24 + 2) * 60 * 60_000, "5d2h"],
+    [(5 * 24 + 2) * 60 * 60_000 + 30 * 60_000, "5d2h"],
+  ])("formats %dms as %s", (ms, expected) => {
+    expect(compactDuration(ms)).toBe(expected);
+  });
+});
+
 describe("deriveComposerStatusLine", () => {
   it("shows remaining percent and reset countdown per window", () => {
     const line = deriveComposerStatusLine({
@@ -26,14 +42,14 @@ describe("deriveComposerStatusLine", () => {
         {
           id: "w",
           kind: "weekly",
-          label: "W",
+          label: "Weekly",
           usedPercent: 13,
           resetsAt: "2026-11-11T11:00:00.000Z",
         },
         {
           id: "s",
           kind: "session",
-          label: "S",
+          label: "Session",
           usedPercent: 11,
           resetsAt: "2026-11-05T13:04:30.000Z",
         },
@@ -45,8 +61,16 @@ describe("deriveComposerStatusLine", () => {
     });
     expect(line).toEqual({
       windows: [
-        { label: "Session", remainingPercent: 89, resetsIn: "3h 4m" },
-        { label: "Weekly", remainingPercent: 87, resetsIn: "6d 1h" },
+        {
+          label: "Session",
+          remainingPercent: 89,
+          resetsIn: { short: "3h4m", long: "3h 4m" },
+        },
+        {
+          label: "Weekly",
+          remainingPercent: 87,
+          resetsIn: { short: "6d1h", long: "6d 1h" },
+        },
       ],
       cache: null,
     });
@@ -62,7 +86,7 @@ describe("deriveComposerStatusLine", () => {
         promptCacheSupported: false,
         now: NOW,
       })?.cache,
-    ).toEqual({ remaining: "3m" });
+    ).toEqual({ remaining: { short: "3m", long: "3m" } });
     expect(
       deriveComposerStatusLine({
         report: null,
@@ -83,7 +107,7 @@ describe("deriveComposerStatusLine", () => {
         promptCacheSupported: false,
         now: NOW,
       })?.cache,
-    ).toEqual({ remaining: "1m" });
+    ).toEqual({ remaining: { short: "1m", long: "1m" } });
     expect(
       deriveComposerStatusLine({
         report: null,

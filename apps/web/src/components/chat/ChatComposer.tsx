@@ -3321,11 +3321,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                 };
               }}
               data-chat-composer-body="true"
-              className={cn(
-                "relative px-4 pb-2",
-                "pt-3.5 sm:pt-4",
-                isComposerCollapsedMobile && "hidden",
-              )}
+              className={cn("relative px-4 pb-2", "pt-2", isComposerCollapsedMobile && "hidden")}
             >
               {isStashMenuOpen && !composerMenuOpen && (
                 <ComposerCommandMenuLayer anchor={composerMenuAnchor}>
