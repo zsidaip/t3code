@@ -28,7 +28,13 @@ const TEST_CONFIG_PACKAGES = [
 // from their own directory, as CI does, so they keep one plain project.
 const isRepoRootTestRun = process.cwd() === import.meta.dirname;
 
+const RESTRICTED_TEST_IMPORT_MESSAGE = 'Import test APIs from "vite-plus/test".';
+
 const RESTRICTED_IMPORT_PATHS = [
+  {
+    name: "vitest",
+    message: RESTRICTED_TEST_IMPORT_MESSAGE,
+  },
   {
     name: "@t3tools/client-runtime",
     message:
@@ -76,6 +82,11 @@ const RESTRICTED_PULL_REQUEST_GLYPH_IMPORTS = {
   ],
   message:
     "Pick a glyph by meaning from PullRequestGlyph in apps/web/src/components/pullRequest/pullRequestIcons.tsx so every surface draws the same pull request the same way.",
+};
+
+const RESTRICTED_TEST_IMPORT_PATTERN = {
+  group: ["vitest/*"],
+  message: RESTRICTED_TEST_IMPORT_MESSAGE,
 };
 
 // Vite+ supports remote configuration before its published types include it.
@@ -278,7 +289,10 @@ export default defineConfig({
       "typescript/unbound-method": "off",
       "eslint/no-restricted-imports": [
         "error",
-        { paths: [...RESTRICTED_IMPORT_PATHS, RESTRICTED_PULL_REQUEST_GLYPH_IMPORTS] },
+        {
+          paths: [...RESTRICTED_IMPORT_PATHS, RESTRICTED_PULL_REQUEST_GLYPH_IMPORTS],
+          patterns: [RESTRICTED_TEST_IMPORT_PATTERN],
+        },
       ],
       "t3code/no-global-process-runtime": "error",
       "t3code/no-inline-schema-compile": "error",
@@ -381,7 +395,7 @@ export default defineConfig({
             "error",
             {
               paths: [...RESTRICTED_IMPORT_PATHS, RESTRICTED_PULL_REQUEST_GLYPH_IMPORTS],
-              patterns: RESTRICTED_UI_VARIANT_PATTERNS,
+              patterns: [...RESTRICTED_UI_VARIANT_PATTERNS, RESTRICTED_TEST_IMPORT_PATTERN],
             },
           ],
         },
@@ -394,6 +408,7 @@ export default defineConfig({
             {
               paths: [...RESTRICTED_IMPORT_PATHS, RESTRICTED_PULL_REQUEST_GLYPH_IMPORTS],
               patterns: [
+                RESTRICTED_TEST_IMPORT_PATTERN,
                 {
                   group: [
                     "**/components/ui/AndroidScreenHeader",
@@ -409,7 +424,12 @@ export default defineConfig({
       },
       {
         files: ["apps/web/src/components/pullRequest/pullRequestIcons.tsx"],
-        rules: { "eslint/no-restricted-imports": ["error", { paths: RESTRICTED_IMPORT_PATHS }] },
+        rules: {
+          "eslint/no-restricted-imports": [
+            "error",
+            { paths: RESTRICTED_IMPORT_PATHS, patterns: [RESTRICTED_TEST_IMPORT_PATTERN] },
+          ],
+        },
       },
       {
         // The server and every client load a forge's shared definition, so a UI runtime
@@ -421,6 +441,7 @@ export default defineConfig({
             {
               paths: [...RESTRICTED_IMPORT_PATHS, RESTRICTED_PULL_REQUEST_GLYPH_IMPORTS],
               patterns: [
+                RESTRICTED_TEST_IMPORT_PATTERN,
                 {
                   group: [
                     "react",
@@ -456,6 +477,7 @@ export default defineConfig({
             {
               paths: [...RESTRICTED_IMPORT_PATHS, RESTRICTED_PULL_REQUEST_GLYPH_IMPORTS],
               patterns: [
+                RESTRICTED_TEST_IMPORT_PATTERN,
                 {
                   group: [
                     "@t3tools/source-control-*/client/*",
