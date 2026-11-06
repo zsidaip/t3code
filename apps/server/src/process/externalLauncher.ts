@@ -163,6 +163,27 @@ function resolveCommandEditorArgs(
   }
 }
 
+const WSL_UNC_TARGET_PATTERN = /^\\\\(?:wsl\.localhost|wsl\$)\\(\w(?:[\w \-.]*\w)?)(?:\\(.*))?$/i;
+const WSL_REMOTE_EDITORS: ReadonlySet<EditorId> = new Set(["vscode", "vscode-insiders", "cursor"]);
+
+// A UNC folder opens as a slow local workspace without the WSL server; --remote runs it inside the distro.
+export function resolveWslRemoteEditorArgs(
+  editor: (typeof EDITORS)[number],
+  target: string,
+  platform: NodeJS.Platform,
+): ReadonlyArray<string> | undefined {
+  if (platform !== "win32" || !WSL_REMOTE_EDITORS.has(editor.id)) return undefined;
+  const match = WSL_UNC_TARGET_PATTERN.exec(target.trim());
+  if (!match) return undefined;
+  const linuxPath = `/${(match[2] ?? "").split("\\").filter(Boolean).join("/")}`;
+  return [
+    ...("baseArgs" in editor ? editor.baseArgs : []),
+    "--remote",
+    `wsl+${match[1]}`,
+    ...resolveCommandEditorArgs(editor, linuxPath),
+  ];
+}
+
 function encodeUtf16LeBase64(input: string): string {
   const bytes = new Uint8Array(input.length * 2);
   for (let index = 0; index < input.length; index += 1) {
@@ -487,7 +508,10 @@ const resolveEditorLaunch = Effect.fn("resolveEditorLaunch")(function* (
       editor: editorDef.id,
       target: input.cwd,
       command,
-      args: [...baseArgs, ...resolveCommandEditorArgs(editorDef, input.cwd)],
+      args: resolveWslRemoteEditorArgs(editorDef, input.cwd, platform) ?? [
+        ...baseArgs,
+        ...resolveCommandEditorArgs(editorDef, input.cwd),
+      ],
     };
   }
 

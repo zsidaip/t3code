@@ -906,3 +906,33 @@ it.effect("starts a Windows command shim for unicode paths with cmd metacharacte
     );
   }),
 );
+
+it.each([
+  [
+    "vscode",
+    "\\\\wsl.localhost\\Ubuntu-24.04\\home\\me\\app",
+    ["--remote", "wsl+Ubuntu-24.04", "/home/me/app"],
+  ],
+  ["vscode", "\\\\wsl$\\Debian", ["--remote", "wsl+Debian", "/"]],
+  [
+    "vscode-insiders",
+    "\\\\wsl.localhost\\Ubuntu\\home\\me\\app\\a.ts:12:4",
+    ["--remote", "wsl+Ubuntu", "--goto", "/home/me/app/a.ts:12:4"],
+  ],
+  ["cursor", "\\\\wsl$\\Ubuntu\\srv\\app", ["--classic", "--remote", "wsl+Ubuntu", "/srv/app"]],
+] as const)("builds WSL remote args for %s from %s", (id, target, expected) => {
+  const editor = EDITORS.find((candidate) => candidate.id === id)!;
+  assert.deepEqual(ExternalLauncher.resolveWslRemoteEditorArgs(editor, target, "win32"), expected);
+});
+
+it("leaves non-WSL targets, other editors, and non-Windows hosts untouched", () => {
+  const vscode = EDITORS.find((candidate) => candidate.id === "vscode")!;
+  const zed = EDITORS.find((candidate) => candidate.id === "zed")!;
+  const unc = "\\\\wsl.localhost\\Ubuntu\\home\\me";
+  assert.isUndefined(ExternalLauncher.resolveWslRemoteEditorArgs(vscode, "C:\\work", "win32"));
+  assert.isUndefined(
+    ExternalLauncher.resolveWslRemoteEditorArgs(vscode, "\\\\server\\share", "win32"),
+  );
+  assert.isUndefined(ExternalLauncher.resolveWslRemoteEditorArgs(zed, unc, "win32"));
+  assert.isUndefined(ExternalLauncher.resolveWslRemoteEditorArgs(vscode, unc, "linux"));
+});
