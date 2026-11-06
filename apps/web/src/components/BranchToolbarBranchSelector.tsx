@@ -50,6 +50,7 @@ import {
   resolveBranchToolbarPrBranch,
   resolveBranchSelectionTarget,
   resolveBranchToolbarValue,
+  resolveWorktreeName,
   resolveDraftEnvModeAfterBranchChange,
   resolveEffectiveEnvMode,
   sanitizeNewRefName,
@@ -538,6 +539,8 @@ export function BranchToolbarBranchSelector({
     startFromOrigin,
   });
 
+  const worktreeName = resolveWorktreeName(activeWorktreePath);
+
   const branchPrBranch = resolveBranchToolbarPrBranch({
     activeThreadBranch,
     resolvedActiveBranch,
@@ -731,7 +734,17 @@ export function BranchToolbarBranchSelector({
               )}
             />
             <ComposerContextLabel displayMode={displayMode}>
-              <MiddleTruncate value={triggerLabel} variant="cap-aligned" className="w-full" />
+              {worktreeName ? (
+                <span className="flex min-w-0 items-baseline gap-1">
+                  <MiddleTruncate value={triggerLabel} variant="cap-aligned" className="min-w-0" />
+                  <span aria-hidden className="shrink-0 text-muted-foreground/60">
+                    ·
+                  </span>
+                  <span className="min-w-0 truncate text-muted-foreground">{worktreeName}</span>
+                </span>
+              ) : (
+                <MiddleTruncate value={triggerLabel} variant="cap-aligned" className="w-full" />
+              )}
             </ComposerContextLabel>
           </ComboboxTrigger>
         </span>

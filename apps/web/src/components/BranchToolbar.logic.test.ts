@@ -9,8 +9,21 @@ import {
   resolveBranchToolbarPrBranch,
   resolveLocalCheckoutBranchMismatch,
   sanitizeNewRefName,
+  resolveWorktreeName,
   shouldIncludeBranchPickerItem,
 } from "./BranchToolbar.logic";
+
+describe("resolveWorktreeName", () => {
+  it("returns the last path segment for posix and windows paths", () => {
+    expect(resolveWorktreeName("/repo/.t3/worktrees/t3code-fork")).toBe("t3code-fork");
+    expect(resolveWorktreeName("D:\\work\\t3code-fork\\")).toBe("t3code-fork");
+  });
+
+  it("returns null without a worktree", () => {
+    expect(resolveWorktreeName(null)).toBeNull();
+    expect(resolveWorktreeName("/")).toBeNull();
+  });
+});
 
 describe("resolveDraftEnvModeAfterBranchChange", () => {
   it("switches to local mode when returning from an existing worktree to the main worktree", () => {

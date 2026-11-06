@@ -223,6 +223,11 @@ export function resolveBranchTriggerLabel(input: {
   return resolvedActiveBranch;
 }
 
+export function resolveWorktreeName(worktreePath: string | null): string | null {
+  const name = worktreePath?.split(/[\\/]+/).findLast((segment) => segment.length > 0);
+  return name ?? null;
+}
+
 export function resolveBranchToolbarPrBranch(input: {
   activeThreadBranch: string | null;
   resolvedActiveBranch: string | null;
