@@ -5,12 +5,16 @@ import type {
   UsageLimitSourceSnapshots,
 } from "@t3tools/contracts";
 import { collectProviderUsageLimits } from "@t3tools/shared/usageLimits";
-import { GaugeIcon, TimerIcon } from "lucide-react";
 
 import { useNowMinute } from "../../hooks/useNowMinute";
 import { cn } from "../../lib/utils";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
-import { type ComposerStatus, deriveComposerStatusLine } from "./ComposerStatusLine.logic";
+import {
+  cacheTone,
+  type ComposerBarTone,
+  type ComposerStatus,
+  deriveComposerStatusLine,
+} from "./ComposerStatusLine.logic";
 
 export function useComposerStatusLine({
   providerInstanceId,
@@ -39,58 +43,48 @@ export function useComposerStatusLine({
   });
 }
 
-export function ComposerStatusLine({ line }: { readonly line: ComposerStatus }) {
-  const cacheExpired = line.cache !== null && line.cache.remaining === null;
+const TONE_FILL: Record<ComposerBarTone, string> = {
+  normal: "bg-foreground",
+  good: "bg-success",
+  warning: "bg-warning",
+  critical: "bg-destructive",
+};
+
+export function ComposerCacheBar({
+  cache,
+}: {
+  readonly cache: NonNullable<ComposerStatus["cache"]>;
+}) {
+  const expired = cache.remaining === null;
+  const label = cache.remaining
+    ? `Prompt cache: ${cache.remaining.long} left`
+    : "Prompt cache expired";
   return (
     <Tooltip>
       <TooltipTrigger
         render={
           <div
-            className="flex min-w-0 shrink-4 items-center gap-2 text-xs text-muted-foreground tabular-nums"
-            data-chat-composer-status-line="true"
+            role="img"
+            tabIndex={0}
+            aria-label={label}
+            data-chat-composer-cache-bar="true"
+            className="absolute inset-x-0 top-full flex h-1.5 items-center outline-none"
           />
         }
       >
-        <GaugeIcon className="size-3.5 shrink-0" />
-        {line.windows.map((window, index) => (
-          <span key={window.label} className="flex min-w-0 items-center gap-1">
-            {index > 0 ? (
-              <span aria-hidden="true" className="text-muted-foreground">
-                ·
-              </span>
-            ) : null}
-            <span className="truncate">
-              <span className="font-medium text-foreground">{window.usedPercent}%</span>
-              {window.resetsIn ? <span> {window.resetsIn.short}</span> : null}
-            </span>
-          </span>
-        ))}
-        {line.cache ? (
+        <span
+          className={cn(
+            "block h-[3px] w-full overflow-hidden rounded-full",
+            expired ? "bg-destructive/40" : "bg-foreground/15",
+          )}
+        >
           <span
-            className={cn("flex shrink-0 items-center gap-1", cacheExpired && "text-destructive")}
-          >
-            <TimerIcon aria-hidden="true" className="size-3.5" />
-            <span className={cn(!cacheExpired && "font-medium text-foreground")}>
-              {line.cache.remaining?.short ?? "–"}
-            </span>
-          </span>
-        ) : null}
+            className={cn("block h-full", TONE_FILL[cacheTone(cache.fraction, expired)])}
+            style={{ width: `${Math.round(cache.fraction * 100)}%` }}
+          />
+        </span>
       </TooltipTrigger>
-      <TooltipPopup side="top">
-        {line.windows.map((window) => (
-          <span key={window.label} className="block">
-            {`${window.label}: ${window.usedPercent}% used`}
-            {window.resetsIn ? ` · resets in ${window.resetsIn.long}` : null}
-          </span>
-        ))}
-        {line.cache ? (
-          <span className="block">
-            {line.cache.remaining
-              ? `Prompt cache: ${line.cache.remaining.long} left`
-              : "Prompt cache expired"}
-          </span>
-        ) : null}
-      </TooltipPopup>
+      <TooltipPopup side="top">{label}</TooltipPopup>
     </Tooltip>
   );
 }

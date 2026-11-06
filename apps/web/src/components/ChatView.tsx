@@ -180,7 +180,7 @@ import { GuestPendingMessages } from "./chat/GuestShareControls";
 import { useDeviceState } from "~/state/device";
 import { BranchToolbar, type BranchToolbarHandle } from "./BranchToolbar";
 import { ComposerContextPermissions } from "./ComposerContextPermissions";
-import { ComposerStatusLine, useComposerStatusLine } from "./chat/ComposerStatusLine";
+import { useComposerStatusLine } from "./chat/ComposerStatusLine";
 import { makeWorkspaceFileDropHandlers } from "./chat/workspaceFileDrop";
 import { isEditableFocused } from "../lib/editableFocus";
 import { DEFAULT_RESOLVED_KEYBINDINGS } from "@t3tools/shared/keybindings";
@@ -297,7 +297,6 @@ import {
   resolveEffectiveEnvMode,
   resolveLocalCheckoutBranchMismatch,
   shouldShowComposerContextStrip,
-  shouldShowComposerRail,
 } from "./BranchToolbar.logic";
 import {
   getProviderStatusBannerKey,
@@ -1749,12 +1748,6 @@ export default function ChatView(props: ChatViewProps) {
         ? (activeThreadLiveTokenUsage ?? null)
         : null,
   });
-  const showComposerRail = shouldShowComposerRail({
-    showContextStrip: showComposerContextStrip,
-    hasActiveProject: !embedded && activeProject !== null && !showProviderSubagentBar,
-    hasStatusLine: composerStatusLine !== null,
-  });
-  const statusLine = composerStatusLine ? <ComposerStatusLine line={composerStatusLine} /> : null;
   const terminalShortcutLabelOptions = {
     context: {
       terminalFocus: true,
@@ -3567,7 +3560,7 @@ export default function ChatView(props: ChatViewProps) {
                     }
                   >
                     <ChildThreadApprovals threadRef={activeThreadRef} />
-                    <ComposerSurface.Shell contextRow={showComposerRail}>
+                    <ComposerSurface.Shell contextRow={showComposerContextStrip}>
                       <ComposerSurface.Host
                         inert={queuedRunEdit.isSaving}
                         aria-busy={queuedRunEdit.isSaving}
@@ -3655,6 +3648,7 @@ export default function ChatView(props: ChatViewProps) {
                                             : projectCloneSendBlockReason
                               }
                               isPreparingWorktree={isPreparingWorktree && !sendQueuesBehindSetup}
+                              usageStatus={composerStatusLine}
                               bannerItems={
                                 isDraftHeroState || composerBannerItems.length === 0
                                   ? EMPTY_COMPOSER_BANNER_ITEMS
@@ -3771,11 +3765,10 @@ export default function ChatView(props: ChatViewProps) {
                           data-terminal-open={terminalUiState.terminalOpen ? "true" : undefined}
                           className="relative z-0"
                         >
-                          {showComposerRail && (
+                          {showComposerContextStrip && (
                             <div className="pointer-events-auto">
                               {showComposerContextStrip ? (
                                 <BranchToolbar
-                                  leading={statusLine}
                                   forceNewWorktree={multipleModelSelections !== null}
                                   ref={branchToolbarRef}
                                   environmentId={activeThread.environmentId}
@@ -3829,11 +3822,7 @@ export default function ChatView(props: ChatViewProps) {
                                         ),
                                       })}
                                 />
-                              ) : (
-                                <ComposerSurface.ContextStrip>
-                                  {statusLine}
-                                </ComposerSurface.ContextStrip>
-                              )}
+                              ) : null}
                             </div>
                           )}
                         </div>
@@ -3848,9 +3837,11 @@ export default function ChatView(props: ChatViewProps) {
                     <div
                       aria-hidden
                       className={
-                        showComposerRail
+                        showComposerContextStrip
                           ? "h-[calc(env(safe-area-inset-bottom)+0.5rem)]"
-                          : "h-[calc(env(safe-area-inset-bottom)+1rem)] sm:h-[env(safe-area-inset-bottom)]"
+                          : terminalUiState.terminalOpen
+                            ? "h-[calc(env(safe-area-inset-bottom)+0.25rem)]"
+                            : "h-[calc(env(safe-area-inset-bottom)+1rem)] sm:h-[env(safe-area-inset-bottom)]"
                       }
                     />
                   </div>

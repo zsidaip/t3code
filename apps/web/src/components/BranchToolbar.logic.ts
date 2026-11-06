@@ -66,14 +66,6 @@ export function shouldShowComposerContextStrip(input: {
   );
 }
 
-export function shouldShowComposerRail(input: {
-  showContextStrip: boolean;
-  hasActiveProject: boolean;
-  hasStatusLine: boolean;
-}): boolean {
-  return input.showContextStrip || (input.hasActiveProject && input.hasStatusLine);
-}
-
 // Hysteresis prevents labels and icons from flapping at the width boundary.
 const CONTEXT_STRIP_COMPACT_EXPAND_HYSTERESIS_PX = 16;
 

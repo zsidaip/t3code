@@ -1,7 +1,12 @@
 import type { UsageLimitsReport } from "@t3tools/contracts";
 import { describe, expect, it } from "vite-plus/test";
 
-import { compactDuration, deriveComposerStatusLine } from "./ComposerStatusLine.logic";
+import {
+  cacheFraction,
+  cacheTone,
+  compactDuration,
+  deriveComposerStatusLine,
+} from "./ComposerStatusLine.logic";
 
 const NOW = Date.parse("2026-11-05T10:00:00.000Z");
 
@@ -32,6 +37,32 @@ describe("compactDuration", () => {
     [(5 * 24 + 2) * 60 * 60_000 + 30 * 60_000, "5d2h"],
   ])("formats %dms as %s", (ms, expected) => {
     expect(compactDuration(ms)).toBe(expected);
+  });
+});
+
+describe("cacheFraction", () => {
+  it.each([
+    [150_000, 300_000, 0.5],
+    [300_000, 300_000, 1],
+    [400_000, 300_000, 1],
+    [-1, 300_000, 0],
+    [10, 0, 0],
+  ])("%dms left of %dms is %d", (left, ttl, expected) => {
+    expect(cacheFraction(left, ttl)).toBe(expected);
+  });
+});
+
+describe("cacheTone", () => {
+  it.each([
+    [1, false, "good"],
+    [0.9, false, "good"],
+    [0.89, false, "normal"],
+    [0.2, false, "normal"],
+    [0.19, false, "warning"],
+    [0, true, "critical"],
+    [0.9, true, "critical"],
+  ] as const)("fraction %d expired=%s is %s", (fraction, expired, expected) => {
+    expect(cacheTone(fraction, expired)).toBe(expected);
   });
 });
 
@@ -86,7 +117,7 @@ describe("deriveComposerStatusLine", () => {
         promptCacheSupported: false,
         now: NOW,
       })?.cache,
-    ).toEqual({ remaining: { short: "3m", long: "3m" } });
+    ).toEqual({ remaining: { short: "3m", long: "3m" }, fraction: 0.6 });
     expect(
       deriveComposerStatusLine({
         report: null,
@@ -95,7 +126,7 @@ describe("deriveComposerStatusLine", () => {
         promptCacheSupported: false,
         now: NOW,
       })?.cache,
-    ).toEqual({ remaining: null });
+    ).toEqual({ remaining: null, fraction: 0 });
     expect(
       deriveComposerStatusLine({
         report: null,
@@ -107,7 +138,7 @@ describe("deriveComposerStatusLine", () => {
         promptCacheSupported: false,
         now: NOW,
       })?.cache,
-    ).toEqual({ remaining: { short: "1m", long: "1m" } });
+    ).toEqual({ remaining: { short: "1m", long: "1m" }, fraction: 0.2 });
     expect(
       deriveComposerStatusLine({
         report: null,
@@ -116,7 +147,7 @@ describe("deriveComposerStatusLine", () => {
         promptCacheSupported: true,
         now: NOW,
       })?.cache,
-    ).toEqual({ remaining: null });
+    ).toEqual({ remaining: null, fraction: 0 });
   });
 
   it("hides when no usable limits and no cache info", () => {

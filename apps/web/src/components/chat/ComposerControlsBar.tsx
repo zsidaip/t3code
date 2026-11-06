@@ -3,6 +3,7 @@ import type { PromptUltrathink } from "./TraitsPicker";
 import type { ProviderInstanceEntry } from "../../providerInstances";
 import { type AppModelOption } from "../../modelSelection";
 import { CircleAlertIcon } from "lucide-react";
+import type { ReactNode } from "react";
 import { CompactComposerControlsMenu } from "./CompactComposerControlsMenu";
 import { ComposerControl } from "./ComposerControl";
 import {
@@ -88,6 +89,7 @@ export function ComposerControlsBar(props: {
   onModelPickerOpenChange: (open: boolean) => void;
   modelPickerIconClassName: string | undefined;
   getModelDisabledReason: ChatComposerProps["getModelDisabledReason"];
+  modelPickerUnderlay?: ReactNode;
 }) {
   const {
     environmentId,
@@ -136,6 +138,7 @@ export function ComposerControlsBar(props: {
     onModelPickerOpenChange,
     modelPickerIconClassName,
     getModelDisabledReason,
+    modelPickerUnderlay,
   } = props;
   const accessMatchesDefault = compatibleRuntimeMode === defaultRuntimeMode;
   const {
@@ -269,7 +272,14 @@ export function ComposerControlsBar(props: {
     </ComposerControl>
   ) : (
     <>
-      {composerModelPicker}
+      {modelPickerUnderlay ? (
+        <div className="relative flex min-w-0 shrink">
+          {composerModelPicker}
+          {modelPickerUnderlay}
+        </div>
+      ) : (
+        composerModelPicker
+      )}
 
       <>
         {restingBlockDefs.map((def, index) => {

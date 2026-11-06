@@ -14,7 +14,25 @@ export interface ComposerStatusWindow {
 
 export interface ComposerStatus {
   readonly windows: readonly ComposerStatusWindow[];
-  readonly cache: { readonly remaining: ComposerDuration | null } | null;
+  readonly cache: {
+    readonly remaining: ComposerDuration | null;
+    readonly fraction: number;
+  } | null;
+}
+
+export type ComposerBarTone = "normal" | "good" | "warning" | "critical";
+
+const CACHE_LOW_FRACTION = 0.2;
+const CACHE_GOOD_FRACTION = 0.9;
+
+export function cacheFraction(leftMs: number, ttlMs: number): number {
+  return ttlMs > 0 && Number.isFinite(leftMs) ? Math.min(1, Math.max(0, leftMs / ttlMs)) : 0;
+}
+
+export function cacheTone(fraction: number, expired: boolean): ComposerBarTone {
+  if (expired) return "critical";
+  if (fraction < CACHE_LOW_FRACTION) return "warning";
+  return fraction >= CACHE_GOOD_FRACTION ? "good" : "normal";
 }
 
 type CacheUsage = Pick<
@@ -46,14 +64,19 @@ function resetsIn(resetsAt: string | undefined, now: number): ComposerDuration |
   return Number.isFinite(at) && at > now ? duration(at - now) : null;
 }
 
-function promptCacheRemaining(usage: CacheUsage, now: number): ComposerDuration | null {
+function promptCacheStatus(
+  usage: CacheUsage,
+  now: number,
+): { remaining: ComposerDuration | null; fraction: number } {
   const expiresAt = usage.promptCacheExpiresAt
     ? Date.parse(usage.promptCacheExpiresAt)
     : Date.parse(usage.updatedAt) + (usage.promptCacheTtlMs ?? 0);
-  if (!Number.isFinite(expiresAt)) return null;
   const left = expiresAt - now;
-  if (left <= 0) return null;
-  return left < MINUTE_MS ? { short: "<1m", long: "<1m" } : duration(left);
+  if (!Number.isFinite(left) || left <= 0) return { remaining: null, fraction: 0 };
+  return {
+    remaining: left < MINUTE_MS ? { short: "<1m", long: "<1m" } : duration(left),
+    fraction: cacheFraction(left, usage.promptCacheTtlMs ?? 0),
+  };
 }
 
 export function deriveComposerStatusLine(input: {
@@ -82,9 +105,9 @@ export function deriveComposerStatusLine(input: {
   });
   const cache =
     input.liveUsage?.promptCacheTtlMs !== undefined
-      ? { remaining: promptCacheRemaining(input.liveUsage, input.now) }
+      ? promptCacheStatus(input.liveUsage, input.now)
       : input.promptCacheSupported
-        ? { remaining: null }
+        ? { remaining: null, fraction: 0 }
         : null;
   if (windows.length === 0 && cache === null) return null;
   return { windows, cache };

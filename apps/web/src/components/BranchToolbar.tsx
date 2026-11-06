@@ -96,8 +96,6 @@ interface BranchToolbarProps {
   envLocked: boolean;
   onCheckoutPullRequestRequest?: (reference: string) => void;
   onComposerFocusRequest?: () => void;
-  /** Shown first in the composer strip, such as the usage line. */
-  leading?: ReactNode;
   /** Shown at the end of the composer strip, such as the new thread's permissions. */
   trailing?: ReactNode;
   availableEnvironments?: readonly EnvironmentOption[];
@@ -531,10 +529,7 @@ function useLabelsOverflow(): readonly [
       let needed = 0;
       let groups = 0;
       for (const child of current.children) {
-        // The usage line truncates itself, so its text length must not flip label compaction.
-        if (!(child instanceof HTMLElement) || child.matches("[data-chat-composer-status-line]")) {
-          continue;
-        }
+        if (!(child instanceof HTMLElement)) continue;
         const width = contentWidth(child);
         if (width <= 1) continue;
         groups += 1;
@@ -621,7 +616,6 @@ export const BranchToolbar = memo(function BranchToolbar({
   onComposerFocusRequest,
   availableEnvironments,
   onEnvironmentChange,
-  leading,
   trailing,
 }: BranchToolbarProps) {
   const branchSelectorRef = useRef<BranchToolbarBranchSelectorHandle>(null);
@@ -742,7 +736,6 @@ export const BranchToolbar = memo(function BranchToolbar({
       data-compact={labelsOverflow ? "" : undefined}
       className={cn("gap-1 text-xs font-normal text-foreground/70 dark:text-muted-foreground")}
     >
-      {leading}
       {showGitControls ? (
         <div className="contents @xl/composer-surface:hidden">
           <RunContextSelector

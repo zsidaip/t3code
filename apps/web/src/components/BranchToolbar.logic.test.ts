@@ -12,7 +12,6 @@ import {
   resolveWorktreeName,
   shouldIncludeBranchPickerItem,
   shouldShowComposerContextStrip,
-  shouldShowComposerRail,
 } from "./BranchToolbar.logic";
 
 describe("resolveWorktreeName", () => {
@@ -308,15 +307,5 @@ describe("composer rail visibility", () => {
     expect(
       shouldShowComposerContextStrip({ ...strip, isGitRepo: true, persistInActiveThreads: false }),
     ).toBe(false);
-  });
-
-  it("keeps the rail for the usage line without a strip, but never an empty one", () => {
-    const rail = { showContextStrip: false, hasActiveProject: true, hasStatusLine: true };
-    expect(shouldShowComposerRail(rail)).toBe(true);
-    expect(shouldShowComposerRail({ ...rail, hasStatusLine: false })).toBe(false);
-    expect(shouldShowComposerRail({ ...rail, hasActiveProject: false })).toBe(false);
-    expect(shouldShowComposerRail({ ...rail, showContextStrip: true, hasStatusLine: false })).toBe(
-      true,
-    );
   });
 });

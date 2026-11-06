@@ -39,7 +39,7 @@ describe("claudeUsageResponseToLimits", () => {
           {
             id: "five_hour",
             kind: "session",
-            label: "Session",
+            label: "5-hour",
             usedPercent: 54,
             windowDurationMins: 300,
             resetsAt: "2026-07-18T14:39:00.000Z",
@@ -158,7 +158,7 @@ describe("claudeUsageResponseToLimits", () => {
       {
         id: "five_hour",
         kind: "session",
-        label: "Session",
+        label: "5-hour",
         usedPercent: 12,
         windowDurationMins: 300,
       },

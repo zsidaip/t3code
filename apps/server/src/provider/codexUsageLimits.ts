@@ -52,8 +52,9 @@ function kindForDuration(mins: number): ServerProviderUsageWindow["kind"] {
   return "session";
 }
 
-function labelForKind(kind: ServerProviderUsageWindow["kind"]): string {
-  return kind === "session" ? "Session" : kind === "weekly" ? "Weekly" : "Monthly";
+function labelForWindow(kind: ServerProviderUsageWindow["kind"], mins: number): string {
+  if (kind === "session") return mins % 60 === 0 ? `${mins / 60}-hour` : "Session";
+  return kind === "weekly" ? "Weekly" : "Monthly";
 }
 
 /** primary/secondary are positions; without windowDurationMins, paid plans use 5-hour/weekly windows and Free/Go use monthly. */
@@ -77,7 +78,7 @@ function codexRateLimitsToWindows(
     windows.push({
       id,
       kind,
-      label: labelForKind(kind),
+      label: labelForWindow(kind, windowDurationMins),
       usedPercent: clampPercent(window.usedPercent),
       windowDurationMins,
       ...(resetsAt ? { resetsAt } : {}),
