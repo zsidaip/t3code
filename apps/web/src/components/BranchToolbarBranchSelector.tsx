@@ -736,11 +736,13 @@ export function BranchToolbarBranchSelector({
             <ComposerContextLabel displayMode={displayMode}>
               {worktreeName ? (
                 <span className="flex min-w-0 items-baseline gap-1">
-                  <MiddleTruncate value={triggerLabel} variant="cap-aligned" className="min-w-0" />
+                  <span className="flex min-w-0 text-muted-foreground">
+                    <MiddleTruncate value={worktreeName} variant="cap-aligned" />
+                  </span>
                   <span aria-hidden className="shrink-0 text-muted-foreground/60">
                     ·
                   </span>
-                  <span className="min-w-0 truncate text-muted-foreground">{worktreeName}</span>
+                  <MiddleTruncate value={triggerLabel} variant="cap-aligned" className="min-w-0" />
                 </span>
               ) : (
                 <MiddleTruncate value={triggerLabel} variant="cap-aligned" className="w-full" />

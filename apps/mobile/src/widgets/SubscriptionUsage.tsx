@@ -69,7 +69,7 @@ function SubscriptionUsage(
       ? []
       : provider.windows.filter((window) => period === "auto" || window.kind === period);
     const tightest = windows.reduce<(typeof windows)[number] | undefined>(
-      (result, window) => (!result || window.remaining < result.remaining ? window : result),
+      (result, window) => (!result || window.used > result.used ? window : result),
       undefined,
     );
     const compactWindows = [
@@ -109,7 +109,7 @@ function SubscriptionUsage(
             accessibilityElement("ignore"),
             accessibilityLabel(
               tightest
-                ? `${provider.name}, ${tightest.label}, ${tightest.remaining} percent remaining. ${tightest.reset}. ${provider.detail}.`
+                ? `${provider.name}, ${tightest.label}, ${tightest.used} percent used. ${tightest.reset}. ${provider.detail}.`
                 : `${provider.name}. ${detail}.`,
             ),
           ]}
@@ -135,15 +135,13 @@ function SubscriptionUsage(
               ]}
             >
               {tightest
-                ? `${tightest.remaining}% left`
+                ? `${tightest.used}% used`
                 : period !== "auto" && !stale && provider.windows.length > 0
                   ? "N/A"
                   : "Open T3"}
             </Text>
           </HStack>
-          {tightest ? (
-            <ProgressView value={tightest.remaining / 100} modifiers={barModifiers} />
-          ) : null}
+          {tightest ? <ProgressView value={tightest.used / 100} modifiers={barModifiers} /> : null}
         </VStack>
       );
     }
@@ -170,7 +168,7 @@ function SubscriptionUsage(
           <Text
             modifiers={[font({ textStyle: "caption2" }), foregroundStyle(secondary), lineLimit(1)]}
           >
-            {detail === "Subscription remaining" ? " " : detail}
+            {detail === "Subscription usage" ? " " : detail}
           </Text>
         ) : null}
         {shown.map((window) => (
@@ -181,7 +179,7 @@ function SubscriptionUsage(
             modifiers={[
               accessibilityElement("ignore"),
               accessibilityLabel(
-                `${provider.name}, ${window.label}, ${window.remaining} percent remaining. ${window.reset}. ${provider.detail}.`,
+                `${provider.name}, ${window.label}, ${window.used} percent used. ${window.reset}. ${provider.detail}.`,
               ),
             ]}
           >
@@ -205,17 +203,17 @@ function SubscriptionUsage(
                   lineLimit(1),
                   layoutPriority(1),
                   foregroundStyle(
-                    window.remaining <= 10 && !monochrome
+                    window.used >= 90 && !monochrome
                       ? (palette?.danger ??
                           (widgetEnvironment.colorScheme === "light" ? "#dc2626" : "#fca5a5"))
                       : primary,
                   ),
                 ]}
               >
-                {window.remaining}% left
+                {window.used}% used
               </Text>
             </HStack>
-            <ProgressView value={window.remaining / 100} modifiers={barModifiers} />
+            <ProgressView value={window.used / 100} modifiers={barModifiers} />
             {!compact ? (
               <Text modifiers={[font({ size: 10 }), foregroundStyle(secondary), lineLimit(1)]}>
                 {window.reset}

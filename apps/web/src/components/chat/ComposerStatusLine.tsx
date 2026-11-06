@@ -10,9 +10,9 @@ import { GaugeIcon, TimerIcon } from "lucide-react";
 import { useNowMinute } from "../../hooks/useNowMinute";
 import { cn } from "../../lib/utils";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
-import { deriveComposerStatusLine } from "./ComposerStatusLine.logic";
+import { type ComposerStatus, deriveComposerStatusLine } from "./ComposerStatusLine.logic";
 
-export function ComposerStatusLine({
+export function useComposerStatusLine({
   providerInstanceId,
   providerDriver,
   providers,
@@ -24,27 +24,29 @@ export function ComposerStatusLine({
   readonly providers: readonly ServerProvider[];
   readonly sources: UsageLimitSourceSnapshots;
   readonly liveUsage: OrchestrationV2ProviderTurnTokenUsage | null;
-}) {
+}): ComposerStatus | null {
   const now = Date.parse(`${useNowMinute()}Z`);
   const report =
     providerInstanceId === null
       ? null
       : collectProviderUsageLimits(providerInstanceId, providers, sources, now);
-  const line = deriveComposerStatusLine({
+  return deriveComposerStatusLine({
     report,
     instanceId: providerInstanceId,
     liveUsage,
     promptCacheSupported: providerDriver === "claudeAgent",
     now,
   });
-  if (line === null) return null;
+}
+
+export function ComposerStatusLine({ line }: { readonly line: ComposerStatus }) {
   const cacheExpired = line.cache !== null && line.cache.remaining === null;
   return (
     <Tooltip>
       <TooltipTrigger
         render={
           <div
-            className="flex h-8 min-w-0 shrink items-center gap-2 text-xs text-muted-foreground tabular-nums"
+            className="flex min-w-0 shrink-4 items-center gap-2 text-xs text-muted-foreground tabular-nums"
             data-chat-composer-status-line="true"
           />
         }
@@ -58,7 +60,7 @@ export function ComposerStatusLine({
               </span>
             ) : null}
             <span className="truncate">
-              <span className="font-medium text-foreground">{window.remainingPercent}%</span>
+              <span className="font-medium text-foreground">{window.usedPercent}%</span>
               {window.resetsIn ? <span> {window.resetsIn.short}</span> : null}
             </span>
           </span>
@@ -77,7 +79,7 @@ export function ComposerStatusLine({
       <TooltipPopup side="top">
         {line.windows.map((window) => (
           <span key={window.label} className="block">
-            {`${window.label}: ${window.remainingPercent}% left`}
+            {`${window.label}: ${window.usedPercent}% used`}
             {window.resetsIn ? ` · resets in ${window.resetsIn.long}` : null}
           </span>
         ))}

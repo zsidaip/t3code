@@ -20,7 +20,7 @@ import {
   elapsedShare,
   exhaustedUsageWindow,
   paceOf,
-  paceRemainingPercent,
+  paceUsedPercent,
   usesChatGptSharing,
   resolveNewThreadModelSelection,
 } from "./usageLimits.ts";
@@ -156,7 +156,7 @@ describe("new thread model fallback", () => {
 describe("pace", () => {
   it("places the clock three fifths through a five-hour window with two hours left", () => {
     expect(elapsedShare(window, now)).toBeCloseTo(0.6);
-    expect(paceRemainingPercent(window, now)).toBe(40);
+    expect(paceUsedPercent(window, now)).toBe(60);
     expect(paceOf(window, now)).toBe("under");
     expect(paceOf({ ...window, usedPercent: 62 }, now)).toBe("on");
     expect(paceOf({ ...window, usedPercent: 80 }, now)).toBe("ahead");
@@ -837,7 +837,6 @@ describe("pools", () => {
     expect(untimed[0]?.windows[0]?.pace).toBe("on");
     expect(session).toMatchObject({
       id: "five_hour",
-      remainingPercent: 40,
       usedPercent: 60,
       pace: "under",
     });
@@ -847,7 +846,7 @@ describe("pools", () => {
       ["hub:a", 40],
       ["hub:b", 20],
     ]);
-    expect(week).toMatchObject({ id: "seven_day", remainingPercent: 80, members: [{}] });
+    expect(week).toMatchObject({ id: "seven_day", usedPercent: 20, members: [{}] });
     // Codex reports `primary` for both its five-hour and (on Go) monthly window.
     const mixed = collectLimitPools(
       [
@@ -942,7 +941,7 @@ describe("pooled account columns", () => {
         driver: ProviderDriverKind.make(driver),
       };
       const [session] = collectLimitPools([a], now)[0]!.windows;
-      expect.soft(session?.remainingPercent).toBe(0);
+      expect.soft(session?.usedPercent).toBe(100);
       expect(session?.resets[0]).toMatchObject({
         at: Date.parse(at(usableAt)),
         restoresPercent,
@@ -967,8 +966,8 @@ describe("pooled account columns", () => {
     ];
     const snapshot = structuredClone(accounts);
     const [claude, cursor] = collectLimitPools(accounts, now);
-    expect.soft(claude?.windows.map((row) => row.remainingPercent)).toEqual([40, 1, 70]);
-    expect.soft(cursor?.windows.map((row) => row.remainingPercent)).toEqual([60, 0, 80]);
+    expect.soft(claude?.windows.map((row) => row.usedPercent)).toEqual([60, 100, 30]);
+    expect.soft(cursor?.windows.map((row) => row.usedPercent)).toEqual([40, 100, 20]);
     expect(accounts).toEqual(snapshot);
   });
 
@@ -990,7 +989,7 @@ describe("pooled account columns", () => {
       ["b", "a"],
     ]);
     expect(pool!.windows[1]!.resets.map((reset) => reset.member.account.key)).toEqual(["a", "b"]);
-    expect(pool!.windows[1]!.remainingPercent).toBe(50);
+    expect(pool!.windows[1]!.usedPercent).toBe(50);
     expect(keys(collectLimitPools(accounts.toReversed(), now)[0]!)).toEqual(keys(pool!));
   });
 
@@ -1007,7 +1006,7 @@ describe("pooled account columns", () => {
         ],
         now,
       );
-      expect(pool!.windows[0]).toMatchObject({ remainingPercent: 0, pace: null, resets: [] });
+      expect(pool!.windows[0]).toMatchObject({ usedPercent: 100, pace: null, resets: [] });
       expect(pool!.windows[0]!.columns.map((column) => column.window?.resetsAt)).toEqual([
         undefined,
         undefined,
@@ -1023,7 +1022,7 @@ describe("pooled account columns", () => {
     const available = account("available", [window]);
     const [before] = collectLimitPools([blocked, available], now);
     expect(before!.accounts.map((account) => account.key)).toEqual(["available", "blocked"]);
-    expect(before!.windows[0]!.remainingPercent).toBe(30);
+    expect(before!.windows[0]!.usedPercent).toBe(70);
     const refreshed = {
       ...blocked,
       limits: {
@@ -1033,7 +1032,7 @@ describe("pooled account columns", () => {
     };
     const [after] = collectLimitPools([refreshed, available], now);
     expect(after!.accounts.map((account) => account.key)).toEqual(["blocked", "available"]);
-    expect(after!.windows[0]!.remainingPercent).toBe(60);
+    expect(after!.windows[0]!.usedPercent).toBe(40);
     expect(after!.windows[0]!.resets[0]).toMatchObject({
       at: Date.parse("2026-09-03T13:00:00.000Z"),
       restoresPercent: 20,
@@ -1057,7 +1056,7 @@ describe("pooled account columns", () => {
       [null, "b", "c"],
     ]);
     expect(pool!.windows[1]!.members.map((member) => member.account.key)).toEqual(["b", "c"]);
-    expect(pool!.windows[1]!.remainingPercent).toBe(40);
+    expect(pool!.windows[1]!.usedPercent).toBe(60);
     expect(pool!.windows[1]!.resets.map((reset) => reset.restoresPercent)).toEqual([40, 20]);
   });
 

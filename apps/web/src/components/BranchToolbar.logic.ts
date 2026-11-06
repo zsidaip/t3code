@@ -53,27 +53,25 @@ export function resolveEnvironmentOptionLabel(input: {
   return runtimeLabel ?? savedLabel ?? input.environmentId;
 }
 
-export function shouldShowEnvironmentIndicator(input: {
-  activeEnvironment: Pick<EnvironmentOption, "isPrimary"> | null;
-  canPickEnvironment: boolean;
-}): boolean {
-  if (input.canPickEnvironment) return true;
-  return input.activeEnvironment !== null && !input.activeEnvironment.isPrimary;
-}
-
 export function shouldShowComposerContextStrip(input: {
   isDraftHeroState: boolean;
   persistInActiveThreads: boolean;
   hasActiveProject: boolean;
   isGitRepo: boolean;
-  showEnvironmentIndicator: boolean;
 }): boolean {
   // A new thread always shows the strip, since it names the permissions the first send uses.
   return (
     input.hasActiveProject &&
-    (input.isDraftHeroState ||
-      (input.persistInActiveThreads && (input.isGitRepo || input.showEnvironmentIndicator)))
+    (input.isDraftHeroState || (input.persistInActiveThreads && input.isGitRepo))
   );
+}
+
+export function shouldShowComposerRail(input: {
+  showContextStrip: boolean;
+  hasActiveProject: boolean;
+  hasStatusLine: boolean;
+}): boolean {
+  return input.showContextStrip || (input.hasActiveProject && input.hasStatusLine);
 }
 
 // Hysteresis prevents labels and icons from flapping at the width boundary.

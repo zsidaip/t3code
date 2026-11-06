@@ -11,6 +11,8 @@ import {
   sanitizeNewRefName,
   resolveWorktreeName,
   shouldIncludeBranchPickerItem,
+  shouldShowComposerContextStrip,
+  shouldShowComposerRail,
 } from "./BranchToolbar.logic";
 
 describe("resolveWorktreeName", () => {
@@ -288,5 +290,33 @@ describe("sanitizeNewRefName", () => {
   it("does not collapse dashes the user typed", () => {
     expect(sanitizeNewRefName("new - branch")).toBe("new---branch");
     expect(sanitizeNewRefName("foo--bar")).toBe("foo--bar");
+  });
+});
+
+describe("composer rail visibility", () => {
+  const strip = { isDraftHeroState: false, persistInActiveThreads: true, hasActiveProject: true };
+
+  it("shows the strip for git repos or a new thread, and only with a project", () => {
+    expect(shouldShowComposerContextStrip({ ...strip, isGitRepo: true })).toBe(true);
+    expect(shouldShowComposerContextStrip({ ...strip, isGitRepo: false })).toBe(false);
+    expect(
+      shouldShowComposerContextStrip({ ...strip, isGitRepo: false, isDraftHeroState: true }),
+    ).toBe(true);
+    expect(
+      shouldShowComposerContextStrip({ ...strip, isGitRepo: true, hasActiveProject: false }),
+    ).toBe(false);
+    expect(
+      shouldShowComposerContextStrip({ ...strip, isGitRepo: true, persistInActiveThreads: false }),
+    ).toBe(false);
+  });
+
+  it("keeps the rail for the usage line without a strip, but never an empty one", () => {
+    const rail = { showContextStrip: false, hasActiveProject: true, hasStatusLine: true };
+    expect(shouldShowComposerRail(rail)).toBe(true);
+    expect(shouldShowComposerRail({ ...rail, hasStatusLine: false })).toBe(false);
+    expect(shouldShowComposerRail({ ...rail, hasActiveProject: false })).toBe(false);
+    expect(shouldShowComposerRail({ ...rail, showContextStrip: true, hasStatusLine: false })).toBe(
+      true,
+    );
   });
 });

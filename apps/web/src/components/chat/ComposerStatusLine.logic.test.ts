@@ -63,12 +63,12 @@ describe("deriveComposerStatusLine", () => {
       windows: [
         {
           label: "Session",
-          remainingPercent: 89,
+          usedPercent: 11,
           resetsIn: { short: "3h4m", long: "3h 4m" },
         },
         {
           label: "Weekly",
-          remainingPercent: 87,
+          usedPercent: 13,
           resetsIn: { short: "6d1h", long: "6d 1h" },
         },
       ],

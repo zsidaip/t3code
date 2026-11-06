@@ -58,7 +58,7 @@ describe("subscription widget snapshots", () => {
     expect(snapshot.checkedAt).toBe(now);
     expect(snapshot.providers[0]).toMatchObject({
       name: "Codex",
-      windows: [{ remaining: 60 }],
+      windows: [{ used: 40 }],
       expiresAt: now + 10 * 60_000,
     });
     expect(snapshot.url).toBe(deepLink);
@@ -93,7 +93,7 @@ describe("subscription widget snapshots", () => {
       ],
     ]);
     expect(buildSubscriptionUsageSnapshot(input, deepLink).providers[0]?.detail).toBe(
-      "Subscription remaining",
+      "Subscription usage",
     );
     input.get(EnvironmentId.make("env"))!.serverConfig.providers = [];
     const snapshot = buildSubscriptionUsageSnapshot(input, deepLink);
@@ -112,7 +112,7 @@ describe("subscription widget snapshots", () => {
     );
     expect(snapshot.providers[0]?.windows).toHaveLength(6);
     expect(snapshot.providers[0]?.totalWindows).toBe(20);
-    expect(snapshot.providers[0]?.windows[0]?.remaining).toBe(5);
+    expect(snapshot.providers[0]?.windows[0]?.used).toBe(95);
   });
   it("uses the freshest copy of an account across environments before pooling", () => {
     const input = presentations();
@@ -130,8 +130,8 @@ describe("subscription widget snapshots", () => {
       },
     });
     const snapshot = buildSubscriptionUsageSnapshot(input, deepLink);
-    expect(snapshot.providers[0]?.detail).toBe("Subscription remaining");
-    expect(snapshot.providers[0]?.windows[0]?.remaining).toBe(20);
+    expect(snapshot.providers[0]?.detail).toBe("Subscription usage");
+    expect(snapshot.providers[0]?.windows[0]?.used).toBe(80);
   });
 });
 

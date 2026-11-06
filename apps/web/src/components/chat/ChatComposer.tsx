@@ -34,7 +34,6 @@ import type {
   ScopedThreadRef,
   ServerProvider,
   ThreadId,
-  UsageLimitSourceSnapshots,
 } from "@t3tools/contracts";
 import {
   EnvironmentRequestInvalidError,
@@ -121,7 +120,6 @@ import type { ThreadSyncPhase } from "../../threadSync";
 import { ComposerBanner } from "./ComposerBanner";
 import { ComposerSurface } from "./ComposerSurface";
 import { ComposerBannerStack, type ComposerBannerStackItem } from "./ComposerBannerStack";
-import { ComposerStatusLine } from "./ComposerStatusLine";
 import {
   attachmentsToReleaseOnUploadCapabilityLoss,
   composerOtherFilesForPresentation,
@@ -424,7 +422,6 @@ export interface ChatComposerProps {
 
   lockedProvider: ProviderDriverKind | null;
   providerStatuses: ServerProvider[];
-  usageLimitSources: UsageLimitSourceSnapshots;
   providerCatalogKnown: boolean;
   activeProjectDefaultModelSelection: ModelSelection | null | undefined;
   activeThreadModelSelection: ModelSelection | null | undefined;
@@ -552,7 +549,6 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
     interactionMode: requestedInteractionMode,
     lockedProvider,
     providerStatuses,
-    usageLimitSources,
     providerCatalogKnown,
     activeProjectDefaultModelSelection,
     activeThreadModelSelection,
@@ -3494,17 +3490,6 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                 )}
               >
                 {composerAttachButton ? <div className="me-2">{composerAttachButton}</div> : null}
-                <ComposerStatusLine
-                  providerInstanceId={selectedProviderEntry?.instanceId ?? null}
-                  providerDriver={selectedProviderStatus?.driver ?? null}
-                  providers={providerStatuses}
-                  sources={usageLimitSources}
-                  liveUsage={
-                    activeThreadModelSelection?.instanceId === selectedProviderEntry?.instanceId
-                      ? (contextWindowLiveUsage ?? null)
-                      : null
-                  }
-                />
                 <div
                   data-chat-composer-actions="right"
                   data-chat-composer-transition-actions="true"

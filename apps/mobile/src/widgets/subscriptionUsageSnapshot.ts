@@ -14,7 +14,7 @@ export interface SubscriptionUsageSnapshot {
   providers: Array<{
     name: string;
     detail: string;
-    windows: Array<{ kind?: string; label: string; remaining: number; reset: string }>;
+    windows: Array<{ kind?: string; label: string; used: number; reset: string }>;
     expiresAt: number;
     totalWindows: number;
   }>;
@@ -78,9 +78,7 @@ function subscriptionUsageProps(
           ...pool.windows.flatMap((window) => window.resets.map((reset) => reset.at)),
         );
         const fresh = Number.isFinite(expiresAt) && expiresAt > now;
-        const sortedWindows = [...pool.windows].sort(
-          (a, b) => a.remainingPercent - b.remainingPercent,
-        );
+        const sortedWindows = [...pool.windows].sort((a, b) => b.usedPercent - a.usedPercent);
         const selectedWindows = [
           ...new Set([
             sortedWindows.find((window) => window.kind === "session"),
@@ -90,21 +88,21 @@ function subscriptionUsageProps(
         ]
           .filter((window) => window !== undefined)
           .slice(0, maxWindowsPerProvider)
-          .sort((a, b) => a.remainingPercent - b.remainingPercent);
+          .sort((a, b) => b.usedPercent - a.usedPercent);
         return {
           name,
           detail: !fresh
             ? "Open T3 to refresh"
             : pool.accounts.length > 1
               ? `${pool.accounts.length} accounts · pooled`
-              : "Subscription remaining",
+              : "Subscription usage",
           expiresAt: fresh ? expiresAt : 0,
           totalWindows: fresh ? pool.windows.length : 0,
           windows: fresh
             ? selectedWindows.map((window) => ({
                 kind: window.kind,
                 label: window.label,
-                remaining: Math.round(window.remainingPercent),
+                used: Math.round(window.usedPercent),
                 reset: window.resets[0]
                   ? `Next reset ${new Date(window.resets[0].at).toLocaleString(undefined, {
                       month: "short",

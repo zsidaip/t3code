@@ -1,5 +1,5 @@
 import type { OrchestrationV2ProviderTurnTokenUsage, UsageLimitsReport } from "@t3tools/contracts";
-import { formatDuration, limitsNotice, remainingPercent } from "@t3tools/shared/usageLimits";
+import { formatDuration, limitsNotice, usedPercent } from "@t3tools/shared/usageLimits";
 
 export interface ComposerDuration {
   readonly short: string;
@@ -8,7 +8,7 @@ export interface ComposerDuration {
 
 export interface ComposerStatusWindow {
   readonly label: string;
-  readonly remainingPercent: number;
+  readonly usedPercent: number;
   readonly resetsIn: ComposerDuration | null;
 }
 
@@ -74,7 +74,7 @@ export function deriveComposerStatusLine(input: {
       ? [
           {
             label: window.label,
-            remainingPercent: remainingPercent(window),
+            usedPercent: usedPercent(window),
             resetsIn: resetsIn(window.resetsAt, input.now),
           },
         ]
