@@ -68,7 +68,7 @@ export function ComposerCacheBar({
             tabIndex={0}
             aria-label={label}
             data-chat-composer-cache-bar="true"
-            className="absolute inset-x-0 top-full flex h-1.5 items-center outline-none"
+            className="flex h-1.5 w-full shrink-0 items-end outline-none"
           />
         }
       >

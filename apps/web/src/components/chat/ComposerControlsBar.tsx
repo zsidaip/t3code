@@ -273,7 +273,7 @@ export function ComposerControlsBar(props: {
   ) : (
     <>
       {modelPickerUnderlay ? (
-        <div className="relative flex min-w-0 shrink">
+        <div className="flex h-8 min-w-0 shrink flex-col justify-end [&>button]:h-6.5">
           {composerModelPicker}
           {modelPickerUnderlay}
         </div>
