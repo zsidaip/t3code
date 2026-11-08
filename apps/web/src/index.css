@@ -286,12 +286,12 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
   --color-sidebar-row-active: var(--sidebar-row-active);
   --color-sidebar-row-selected: var(--sidebar-row-selected);
   --color-sidebar-border: var(--contrast-sidebar-border);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-sm: calc(var(--radius) * 0.25);
+  --radius-md: calc(var(--radius) * 0.375);
+  --radius-lg: calc(var(--radius) * 0.5);
+  --radius-xl: calc(var(--radius) * 0.75);
+  --radius-2xl: var(--radius);
+  --radius-3xl: calc(var(--radius) * 1.25);
   @keyframes skeleton {
     /* The single loading-bar breath used by every skeleton: one opacity pulse
        per container, stepped so however many bars sit under it, the compositor
@@ -1268,9 +1268,9 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
     --sidebar-foreground: var(--foreground);
     --sidebar-muted-foreground: var(--muted-foreground);
     --sidebar-control-surface: var(--muted);
-    --sidebar-row-hover: color-mix(in srgb, var(--contrast-foreground) 8%, transparent);
-    --sidebar-row-active: color-mix(in srgb, var(--contrast-foreground) 11%, transparent);
-    --sidebar-row-selected: color-mix(in srgb, var(--contrast-foreground) 7%, transparent);
+    --sidebar-row-hover: color-mix(in srgb, var(--contrast-foreground) 6%, transparent);
+    --sidebar-row-active: color-mix(in srgb, var(--contrast-foreground) 14%, transparent);
+    --sidebar-row-selected: color-mix(in srgb, var(--contrast-foreground) 12%, transparent);
     --sidebar-border: var(--border);
     --sidebar-stage-fade: var(--card);
     /* Row metadata sits a step below read titles (75% white). */
