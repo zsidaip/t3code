@@ -1,7 +1,7 @@
 import type { PreviewMiniPlayerFrame } from "../preview/previewMiniPlayerLayout";
 import { DETAILS_CARD_CLEARANCE } from "./chatCanvasLayout";
 
-export const THREAD_DETAILS_CARD_GAP = 12;
+export const THREAD_DETAILS_CARD_GAP = 6;
 // Keep in sync with --thread-details-panel-width.
 const THREAD_DETAILS_CARD_WIDTH = 280;
 

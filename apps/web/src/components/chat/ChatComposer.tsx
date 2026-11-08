@@ -3260,7 +3260,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
             data-chat-composer-surface="true"
             data-chat-composer-mobile-collapsed={isComposerCollapsedMobile ? "true" : "false"}
             className={cn(
-              "relative rounded-xl transition-[background-color] duration-200",
+              "relative rounded-md transition-[background-color] duration-200",
               "in-data-[thread-context-over]:bg-accent/45 in-data-[thread-context-over]:ring-1 in-data-[thread-context-over]:ring-inset in-data-[thread-context-over]:ring-primary/70",
               isDragOverComposer ? "bg-accent/45 ring-1 ring-inset ring-primary/70" : null,
               projectSelectionRequired ? "opacity-75" : null,
@@ -3493,8 +3493,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
               <div
                 data-chat-composer-footer="true"
                 className={cn(
-                  "flex min-w-0 flex-nowrap items-center overflow-visible px-2 pb-2",
-                  pendingUserInputs.length > 0 && "pt-2",
+                  "flex min-w-0 flex-nowrap items-center overflow-visible border-t border-(--chat-composer-outline) px-1 py-1",
                   showMobilePendingAnswerActions && "hidden sm:flex",
                 )}
               >
