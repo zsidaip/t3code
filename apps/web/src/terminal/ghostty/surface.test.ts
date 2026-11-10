@@ -401,16 +401,21 @@ describe("GhosttyTerminalSurface visibility", () => {
     );
   }
 
-  it.each(["native", "clipboard"])("pastes once when %s arrives first", async (first) => {
+  it.each([
+    ["native", "MacIntel", { metaKey: true }],
+    ["clipboard", "MacIntel", { metaKey: true }],
+    ["native", "Win32", { ctrlKey: true }],
+    ["clipboard", "Win32", { ctrlKey: true }],
+  ] as const)("pastes once when %s arrives first on %s", async (first, platform, modifiers) => {
     const harness = createHarness();
     const read = Promise.resolve("echo hi");
     vi.stubGlobal("navigator", {
-      platform: "MacIntel",
+      platform,
       clipboard: { readText: () => read },
     });
     const surface = await harness.create({ beforeKey: () => true });
 
-    key(surface, "v", "KeyV", { metaKey: true });
+    key(surface, "v", "KeyV", modifiers);
     if (first === "native") paste(surface, "echo hi");
     await read;
     if (first === "clipboard") paste(surface, "echo hi");
